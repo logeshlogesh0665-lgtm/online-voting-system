@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>National e-Voting System | Government of India</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="gov-header">
+            <div class="header-top">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/1200px-Flag_of_India.svg.png" 
+                     alt="Indian Flag" class="flag">
+                <div class="header-text">
+                    <h1>National e-Voting System</h1>
+                    <h2>Government of India</h2>
+                    <p>Secure • Transparent • Accessible</p>
+                </div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/800px-Emblem_of_India.svg.png" 
+                     alt="National Emblem" class="emblem">
+            </div>
+            <div class="header-bottom">
+                <p><i class="fas fa-shield-alt"></i> 100% Secure Platform | <i class="fas fa-user-check"></i> Verified Voters Only | <i class="fas fa-lock"></i> Encrypted Transactions</p>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="welcome-section">
+                <div class="welcome-card">
+                    <div class="welcome-icon">
+                        <i class="fas fa-vote-yea"></i>
+                    </div>
+                    <h2>Welcome to Digital Democracy</h2>
+                    <p class="welcome-text">
+                        Exercise your democratic right through our secure online voting platform. 
+                        This system ensures complete transparency, security, and integrity of the voting process.
+                    </p>
+                    
+                    <div class="features-grid">
+                        <div class="feature">
+                            <i class="fas fa-fingerprint"></i>
+                            <h3>Voter Verification</h3>
+                            <p>Multi-layer identity verification</p>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-mobile-alt"></i>
+                            <h3>OTP Authentication</h3>
+                            <p>One-time password for security</p>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-user-lock"></i>
+                            <h3>Secure Voting</h3>
+                            <p>Encrypted ballot submission</p>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-chart-bar"></i>
+                            <h3>Live Results</h3>
+                            <p>Transparent result declaration</p>
+                        </div>
+                    </div>
+
+                    <div class="instructions">
+                        <h3><i class="fas fa-info-circle"></i> Voting Instructions:</h3>
+                        <ul>
+                            <li>You must be a registered voter to participate</li>
+                            <li>Keep your mobile number ready for OTP verification</li>
+                            <li>Each voter can vote only once</li>
+                            <li>Voting is anonymous and confidential</li>
+                            <li>Results will be displayed after voting ends</li>
+                        </ul>
+                    </div>
+
+                    <a href="login.html" class="btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Proceed to Voter Login
+                    </a>
+                    
+                    <a href="result.html" class="btn-secondary">
+                        <i class="fas fa-chart-line"></i> View Current Results
+                    </a>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <div class="stat-card">
+                    <h3>Voting Statistics</h3>
+                    <div class="stats">
+                        <div class="stat">
+                            <i class="fas fa-users"></i>
+                            <span class="stat-value" id="totalVoters">3</span>
+                            <span class="stat-label">Registered Voters</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-check-circle"></i>
+                            <span class="stat-value" id="votesCast">0</span>
+                            <span class="stat-label">Votes Cast</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-percentage"></i>
+                            <span class="stat-value" id="turnout">0%</span>
+                            <span class="stat-label">Voter Turnout</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="gov-footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4><i class="fas fa-phone-alt"></i> Helpline</h4>
+                    <p>1950 (Toll Free)</p>
+                    <p>help@evoting.gov.in</p>
+                </div>
+                <div class="footer-section">
+                    <h4><i class="fas fa-clock"></i> Voting Hours</h4>
+                    <p>7:00 AM - 6:00 PM</p>
+                    <p>All Days</p>
+                </div>
+                <div class="footer-section">
+                    <h4><i class="fas fa-shield-alt"></i> Security</h4>
+                    <p>ISO 27001 Certified</p>
+                    <p>End-to-End Encryption</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2024 National e-Voting System, Government of India. All rights reserved.</p>
+                <p class="disclaimer">This is a demonstration system for official purposes only.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Load initial stats
+        async function loadStats() {
+            try {
+                const response = await fetch('http://localhost:3000/api/results');
+                const data = await response.json();
+                
+                document.getElementById('votesCast').textContent = data.totalVotes;
+                const turnout = data.totalVotes / 3 * 100; // 3 registered voters
+                document.getElementById('turnout').textContent = `${turnout.toFixed(1)}%`;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+        
+        loadStats();
+    </script>
+</body>
+</html>

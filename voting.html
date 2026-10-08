@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Booth | National e-Voting System</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="gov-header">
+            <div class="header-top">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/1200px-Flag_of_India.svg.png" 
+                     alt="Indian Flag" class="flag">
+                <div class="header-text">
+                    <h1>Secure Voting Booth</h1>
+                    <h2>National e-Voting System</h2>
+                </div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/800px-Emblem_of_India.svg.png" 
+                     alt="National Emblem" class="emblem">
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="voting-container">
+                <div class="voting-header">
+                    <div class="voting-icon">
+                        <i class="fas fa-vote-yea"></i>
+                    </div>
+                    <h2>Electronic Voting Machine</h2>
+                    <p class="voting-subtitle">Cast your vote securely and anonymously</p>
+                </div>
+
+                <div class="voting-card">
+                    <div class="verification-steps">
+                        <div class="step completed">
+                            <span class="step-number"><i class="fas fa-check"></i></span>
+                            <span class="step-text">Voter Details</span>
+                        </div>
+                        <div class="step completed">
+                            <span class="step-number"><i class="fas fa-check"></i></span>
+                            <span class="step-text">OTP Verification</span>
+                        </div>
+                        <div class="step active">
+                            <span class="step-number">3</span>
+                            <span class="step-text">Cast Vote</span>
+                        </div>
+                    </div>
+
+                    <div class="voter-confirmation">
+                        <p><i class="fas fa-user-check"></i> <strong>Verified Voter:</strong> <span id="voterNameDisplay"></span></p>
+                        <p><i class="fas fa-id-card"></i> <strong>Status:</strong> <span class="status-verified">✓ Ready to Vote</span></p>
+                    </div>
+
+                    <div class="voting-instructions">
+                        <h3><i class="fas fa-list-ol"></i> Instructions:</h3>
+                        <ol>
+                            <li>Review all candidate information below</li>
+                            <li>Select your preferred candidate by clicking the "Vote" button</li>
+                            <li>Confirm your selection in the popup window</li>
+                            <li>Your vote will be recorded anonymously</li>
+                            <li>You cannot change your vote after submission</li>
+                        </ol>
+                    </div>
+
+                    <div class="candidates-section">
+                        <h3><i class="fas fa-users"></i> Candidates for Election</h3>
+                        
+                        <div class="candidates-grid" id="candidatesContainer">
+                            <!-- Candidates will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="voting-security">
+                        <h4><i class="fas fa-shield-alt"></i> Voting Security Features:</h4>
+                        <div class="security-features">
+                            <div class="feature">
+                                <i class="fas fa-user-secret"></i>
+                                <span>Anonymous Voting</span>
+                            </div>
+                            <div class="feature">
+                                <i class="fas fa-lock"></i>
+                                <span>End-to-End Encryption</span>
+                            </div>
+                            <div class="feature">
+                                <i class="fas fa-fingerprint"></i>
+                                <span>Digital Signature</span>
+                            </div>
+                            <div class="feature">
+                                <i class="fas fa-history"></i>
+                                <span>Immutable Audit Trail</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="gov-footer">
+            <div class="footer-bottom">
+                <p>© 2024 National e-Voting System, Government of India. All rights reserved.</p>
+                <p class="disclaimer">This is a demonstration system for official purposes only.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Confirm Your Vote</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="confirmation-info">
+                    <p>You are about to vote for:</p>
+                    <div class="selected-candidate" id="selectedCandidateInfo">
+                        <!-- Candidate info will be inserted here -->
+                    </div>
+                    <p class="warning-text">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>This action cannot be undone.</strong> Once submitted, your vote is final.
+                    </p>
+                </div>
+                <div class="modal-actions">
+                    <button id="cancelVote" class="btn-secondary">Cancel</button>
+                    <button id="confirmVote" class="btn-primary">Confirm & Submit Vote</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let selectedCandidateId = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const name = sessionStorage.getItem('voterName');
+            const token = sessionStorage.getItem('sessionToken');
+            
+            if (!name || !token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            document.getElementById('voterNameDisplay').textContent = name;
+            loadCandidates();
+            setupModal();
+            
+            // Check if already voted
+            checkVotingStatus();
+        });
+        
+        async function checkVotingStatus() {
+            const mobile = sessionStorage.getItem('voterMobile');
+            try {
+                const response = await fetch(`http://localhost:3000/api/voter-status/${mobile}`);
+                const data = await response.json();
+                
+                if (data.hasVoted) {
+                    alert('You have already voted. Redirecting to results page.');
+                    window.location.href = 'result.html';
+                }
+            } catch (error) {
+                console.error('Error checking voting status:', error);
+            }
+        }
+        
+        async function loadCandidates() {
+            try {
+                const response = await fetch('http://localhost:3000/api/results');
+                const data = await response.json();
+                
+                const container = document.getElementById('candidatesContainer');
+                container.innerHTML = '';
+                
+                for (const [id, candidate] of Object.entries(data.candidates)) {
+                    const candidateCard = document.createElement('div');
+                    candidateCard.className = 'candidate-card';
+                    candidateCard.style.borderLeftColor = candidate.color;
+                    
+                    candidateCard.innerHTML = `
+                        <div class="candidate-number">${id}</div>
+                        <div class="candidate-info">
+                            <h4>${candidate.name}</h4>
+                            <div class="candidate-stats">
+                                <span class="stat"><i class="fas fa-vote-yea"></i> ${candidate.votes} votes</span>
+                            </div>
+                        </div>
+                        <button class="vote-btn" data-id="${id}">
+                            <i class="fas fa-check-circle"></i> Vote
+                        </button>
+                    `;
+                    
+                    container.appendChild(candidateCard);
+                }
+                
+                // Add event listeners to vote buttons
+                document.querySelectorAll('.vote-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        selectedCandidateId = this.getAttribute('data-id');
+                        showConfirmationModal(selectedCandidateId);
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading candidates:', error);
+            }
+        }
+        
+        function showConfirmationModal(candidateId) {
+            const candidateCards = document.querySelectorAll('.candidate-card');
+            const selectedCard = document.querySelector(`.vote-btn[data-id="${candidateId}"]`).closest('.candidate-card');
+            const candidateName = selectedCard.querySelector('h4').textContent;
+            
+            document.getElementById('selectedCandidateInfo').innerHTML = `
+                <div class="candidate-card selected">
+                    <h4>${candidateName}</h4>
+                    <p><i class="fas fa-info-circle"></i> Candidate #${candidateId}</p>
+                </div>
+            `;
+            
+            document.getElementById('confirmationModal').style.display = 'block';
+        }
+        
+        function setupModal() {
+            const modal = document.getElementById('confirmationModal');
+            const closeBtn = document.querySelector('.close-modal');
+            const cancelBtn = document.getElementById('cancelVote');
+            const confirmBtn = document.getElementById('confirmVote');
+            
+            closeBtn.onclick = function() {
+                modal.style.display = 'none';
+                selectedCandidateId = null;
+            }
+            
+            cancelBtn.onclick = function() {
+                modal.style.display = 'none';
+                selectedCandidateId = null;
+            }
+            
+            confirmBtn.onclick = async function() {
+                if (!selectedCandidateId) return;
+                
+                // Disable buttons and show loading
+                confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+                confirmBtn.disabled = true;
+                cancelBtn.disabled = true;
+                
+                const mobile = sessionStorage.getItem('voterMobile');
+                
+                try {
+                    const response = await fetch('http://localhost:3000/api/submit-vote', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ 
+                            mobile, 
+                            candidateId: selectedCandidateId 
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Clear session storage (except for result viewing)
+                        sessionStorage.removeItem('sessionToken');
+                        sessionStorage.removeItem('expectedOTP');
+                        
+                        // Show success and redirect
+                        alert('✓ ' + data.message);
+                        window.location.href = 'result.html';
+                    } else {
+                        alert('✗ ' + data.message);
+                        modal.style.display = 'none';
+                        confirmBtn.innerHTML = 'Confirm & Submit Vote';
+                        confirmBtn.disabled = false;
+                        cancelBtn.disabled = false;
+                    }
+                } catch (error) {
+                    alert('✗ Network error. Please try again.');
+                    modal.style.display = 'none';
+                    confirmBtn.innerHTML = 'Confirm & Submit Vote';
+                    confirmBtn.disabled = false;
+                    cancelBtn.disabled = false;
+                }
+            }
+            
+            // Close modal when clicking outside
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                    selectedCandidateId = null;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

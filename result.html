@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Election Results | National e-Voting System</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="gov-header">
+            <div class="header-top">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/1200px-Flag_of_India.svg.png" 
+                     alt="Indian Flag" class="flag">
+                <div class="header-text">
+                    <h1>Election Results Dashboard</h1>
+                    <h2>National e-Voting System</h2>
+                </div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/800px-Emblem_of_India.svg.png" 
+                     alt="National Emblem" class="emblem">
+            </div>
+            <div class="header-bottom">
+                <p><i class="fas fa-chart-line"></i> Live Results | <i class="fas fa-clock"></i> Updated Real-time | <i class="fas fa-check-circle"></i> Officially Certified</p>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="results-container">
+                <div class="results-header">
+                    <div class="results-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h2>Official Election Results</h2>
+                    <p class="results-subtitle">Live voting results as recorded by the National e-Voting System</p>
+                    <div class="last-updated">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Last updated: <span id="lastUpdateTime">Loading...</span></span>
+                        <button id="refreshResults" class="refresh-btn">
+                            <i class="fas fa-redo"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="results-summary">
+                    <div class="summary-card total-votes">
+                        <h3><i class="fas fa-users"></i> Total Votes Cast</h3>
+                        <div class="summary-value" id="totalVotes">0</div>
+                        <div class="summary-label">out of 3 registered voters</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="turnoutBar" style="width: 0%"></div>
+                        </div>
+                        <div class="turnout-percent" id="turnoutPercent">0% Turnout</div>
+                    </div>
+
+                    <div class="summary-card leading-party">
+                        <h3><i class="fas fa-trophy"></i> Leading Candidate</h3>
+                        <div class="party-info" id="leadingCandidate">
+                            <div class="party-color"></div>
+                            <div class="party-details">
+                                <h4>Loading...</h4>
+                                <p>0 votes</p>
+                            </div>
+                        </div>
+                        <div class="vote-lead">
+                            <span>Lead: </span>
+                            <span id="voteLead">0 votes</span>
+                        </div>
+                    </div>
+
+                    <div class="summary-card status">
+                        <h3><i class="fas fa-info-circle"></i> Election Status</h3>
+                        <div class="status-indicator">
+                            <div class="status-dot active"></div>
+                            <span>Voting Active</span>
+                        </div>
+                        <div class="time-remaining">
+                            <i class="fas fa-clock"></i>
+                            <span>Closes: 6:00 PM Today</span>
+                        </div>
+                        <div class="certification">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Results Certified</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-details">
+                    <div class="chart-container">
+                        <h3><i class="fas fa-chart-pie"></i> Vote Distribution</h3>
+                        <canvas id="resultsChart"></canvas>
+                    </div>
+
+                    <div class="candidates-results">
+                        <h3><i class="fas fa-list-ol"></i> Candidate-wise Results</h3>
+                        <div class="results-table-container">
+                            <table class="results-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Candidate / Party</th>
+                                        <th>Votes</th>
+                                        <th>Percentage</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="resultsTableBody">
+                                    <!-- Results will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="voting-timeline">
+                    <h3><i class="fas fa-history"></i> Voting Timeline</h3>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-time">9:00 AM</div>
+                            <div class="timeline-content">
+                                <h4>Voting Started</h4>
+                                <p>Electronic voting system opened to public</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-time" id="lastVoteTime">--:--</div>
+                            <div class="timeline-content">
+                                <h4>Last Vote Cast</h4>
+                                <p>Most recent voter participation</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item future">
+                            <div class="timeline-time">6:00 PM</div>
+                            <div class="timeline-content">
+                                <h4>Voting Closes</h4>
+                                <p>Final results will be declared</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="actions-section">
+                    <a href="index.html" class="btn-primary">
+                        <i class="fas fa-home"></i> Return to Home
+                    </a>
+                    <a href="login.html" class="btn-secondary">
+                        <i class="fas fa-vote-yea"></i> Cast Another Vote (Demo)
+                    </a>
+                    <button id="exportResults" class="btn-secondary">
+                        <i class="fas fa-download"></i> Export Results
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <footer class="gov-footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4><i class="fas fa-certificate"></i> Certification</h4>
+                    <p>Results certified by</p>
+                    <p>Election Commission of India</p>
+                </div>
+                <div class="footer-section">
+                    <h4><i class="fas fa-file-contract"></i> Transparency</h4>
+                    <p>Blockchain Verified</p>
+                    <p>Public Audit Trail</p>
+                </div>
+                <div class="footer-section">
+                    <h4><i class="fas fa-phone-alt"></i> Grievances</h4>
+                    <p>1950 (Toll Free)</p>
+                    <p>grievance@evoting.gov.in</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2024 National e-Voting System, Government of India. All rights reserved.</p>
+                <p class="disclaimer">These are live, unofficial results. Final results will be certified by the Election Commission.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let resultsChart = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadResults();
+            
+            document.getElementById('refreshResults').addEventListener('click', loadResults);
+            document.getElementById('exportResults').addEventListener('click', exportResults);
+            
+            // Auto-refresh every 30 seconds
+            setInterval(loadResults, 30000);
+        });
+        
+        async function loadResults() {
+            try {
+                const response = await fetch('http://localhost:3000/api/results');
+                const data = await response.json();
+                
+                updateResultsDisplay(data);
+                updateChart(data);
+                updateTable(data);
+                
+                // Update last update time
+                const now = new Date();
+                document.getElementById('lastUpdateTime').textContent = 
+                    now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                
+                // Update last vote time
+                if (data.lastVoteTime) {
+                    const lastVote = new Date(data.lastVoteTime);
+                    document.getElementById('lastVoteTime').textContent = 
+                        lastVote.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                }
+            } catch (error) {
+                console.error('Error loading results:', error);
+            }
+        }
+        
+        function updateResultsDisplay(data) {
+            // Total votes
+            document.getElementById('totalVotes').textContent = data.totalVotes;
+            
+            // Turnout percentage
+            const turnoutPercent = (data.totalVotes / 3 * 100).toFixed(1);
+            document.getElementById('turnoutPercent').textContent = `${turnoutPercent}% Turnout`;
+            document.getElementById('turnoutBar').style.width = `${turnoutPercent}%`;
+            
+            // Find leading candidate
+            let leadingCandidate = null;
+            let maxVotes = -1;
+            
+            for (const [id, candidate] of Object.entries(data.candidates)) {
+                if (candidate.votes > maxVotes) {
+                    maxVotes = candidate.votes;
+                    leadingCandidate = candidate;
+                }
+            }
+            
+            // Update leading candidate display
+            if (leadingCandidate) {
+                const leadingDiv = document.getElementById('leadingCandidate');
+                leadingDiv.querySelector('.party-color').style.backgroundColor = leadingCandidate.color;
+                leadingDiv.querySelector('h4').textContent = leadingCandidate.name;
+                leadingDiv.querySelector('p').textContent = `${leadingCandidate.votes} votes`;
+                
+                // Calculate lead
+                const candidates = Object.values(data.candidates);
+                candidates.sort((a, b) => b.votes - a.votes);
+                
+                if (candidates.length > 1) {
+                    const lead = candidates[0].votes - candidates[1].votes;
+                    document.getElementById('voteLead').textContent = `${lead} vote${lead !== 1 ? 's' : ''}`;
+                }
+            }
+        }
+        
+        function updateChart(data) {
+            const ctx = document.getElementById('resultsChart').getContext('2d');
+            
+            const labels = [];
+            const votes = [];
+            const colors = [];
+            
+            for (const [id, candidate] of Object.entries(data.candidates)) {
+                labels.push(candidate.name);
+                votes.push(candidate.votes);
+                colors.push(candidate.color);
+            }
+            
+            if (resultsChart) {
+                resultsChart.destroy();
+            }
+            
+            resultsChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: votes,
+                        backgroundColor: colors,
+                        borderColor: '#ffffff',
+                        borderWidth: 2,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = data.totalVotes;
+                                    const value = context.raw;
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${value} votes (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+        
+        function updateTable(data) {
+            const tbody = document.getElementById('resultsTableBody');
+            tbody.innerHTML = '';
+            
+            const candidates = Object.entries(data.candidates);
+            
+            // Sort by votes descending
+            candidates.sort((a, b) => b[1].votes - a[1].votes);
+            
+            candidates.forEach(([id, candidate], index) => {
+                const percentage = data.totalVotes > 0 
+                    ? ((candidate.votes / data.totalVotes) * 100).toFixed(1)
+                    : 0;
+                
+                const row = document.createElement('tr');
+                
+                // Add position indicator
+                let position = '';
+                let status = '';
+                
+                if (index === 0 && candidate.votes > 0) {
+                    position = '<i class="fas fa-crown" style="color: #FFD700;"></i>';
+                    status = '<span class="status-leading">Leading</span>';
+                } else if (candidate.votes > 0) {
+                    position = (index + 1);
+                    status = '<span class="status-running">Running</span>';
+                } else {
+                    position = (index + 1);
+                    status = '<span class="status-no-votes">No Votes</span>';
+                }
+                
+                row.innerHTML = `
+                    <td class="position-cell">${position}</td>
+                    <td>
+                        <div class="candidate-row">
+                            <div class="party-indicator" style="background-color: ${candidate.color}"></div>
+                            <span>${candidate.name}</span>
+                        </div>
+                    </td>
+                    <td><strong>${candidate.votes}</strong></td>
+                    <td>
+                        <div class="percentage-bar">
+                            <div class="percentage-fill" style="width: ${percentage}%"></div>
+                            <span>${percentage}%</span>
+                        </div>
+                    </td>
+                    <td>${status}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function exportResults() {
+            alert('In a production system, this would download a PDF report of the election results.');
+        }
+    </script>
+</body>
+</html>

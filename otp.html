@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification | National e-Voting System</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="gov-header">
+            <div class="header-top">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/1200px-Flag_of_India.svg.png" 
+                     alt="Indian Flag" class="flag">
+                <div class="header-text">
+                    <h1>Secure OTP Verification</h1>
+                    <h2>National e-Voting System</h2>
+                </div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/800px-Emblem_of_India.svg.png" 
+                     alt="National Emblem" class="emblem">
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="otp-container">
+                <div class="otp-header">
+                    <div class="otp-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h2>Two-Factor Authentication</h2>
+                    <p class="otp-subtitle">Enter the OTP sent to your registered mobile number</p>
+                </div>
+
+                <div class="otp-card">
+                    <div class="verification-steps">
+                        <div class="step completed">
+                            <span class="step-number"><i class="fas fa-check"></i></span>
+                            <span class="step-text">Voter Details</span>
+                        </div>
+                        <div class="step active">
+                            <span class="step-number">2</span>
+                            <span class="step-text">OTP Verification</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span class="step-text">Cast Vote</span>
+                        </div>
+                    </div>
+
+                    <div class="voter-info">
+                        <p><i class="fas fa-user"></i> <strong>Voter:</strong> <span id="displayName"></span></p>
+                        <p><i class="fas fa-mobile-alt"></i> <strong>Mobile:</strong> <span id="displayMobile"></span></p>
+                    </div>
+
+                    <form id="otpForm" class="otp-form">
+                        <div class="form-group">
+                            <label for="otpInput">
+                                <i class="fas fa-key"></i> Enter 6-digit OTP
+                            </label>
+                            <input type="text" 
+                                   id="otpInput" 
+                                   maxlength="6"
+                                   required 
+                                   placeholder="Enter OTP"
+                                   pattern="[0-9]{6}"
+                                   title="Please enter 6-digit OTP">
+                            <div class="hint">OTP is valid for 10 minutes</div>
+                        </div>
+
+                        <div class="otp-timer">
+                            <i class="fas fa-clock"></i>
+                            <span>Time remaining: <span id="countdown">10:00</span></span>
+                        </div>
+
+                        <div class="otp-actions">
+                            <button type="button" id="resendOtp" class="btn-secondary">
+                                <i class="fas fa-redo"></i> Resend OTP
+                            </button>
+                            <button type="submit" class="btn-primary">
+                                Verify OTP <i class="fas fa-check-circle"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="security-alert">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p><strong>Security Alert:</strong> Never share your OTP with anyone. Election officials will never ask for your OTP.</p>
+                    </div>
+
+                    <div class="demo-note">
+                        <h4><i class="fas fa-info-circle"></i> Demo Note:</h4>
+                        <p>For this demo, use OTP: <strong id="demoOtp"></strong></p>
+                        <p>In production, OTP would be sent via SMS to your registered mobile number.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="gov-footer">
+            <div class="footer-bottom">
+                <p>© 2024 National e-Voting System, Government of India. All rights reserved.</p>
+                <p class="disclaimer">This is a demonstration system for official purposes only.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Load voter info from session storage
+        document.addEventListener('DOMContentLoaded', function() {
+            const name = sessionStorage.getItem('voterName');
+            const mobile = sessionStorage.getItem('voterMobile');
+            const expectedOtp = sessionStorage.getItem('expectedOTP');
+            
+            if (!name || !mobile) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            document.getElementById('displayName').textContent = name;
+            document.getElementById('displayMobile').textContent = mobile;
+            document.getElementById('demoOtp').textContent = expectedOtp;
+            
+            // Start countdown timer
+            startCountdown(600); // 10 minutes
+        });
+        
+        function startCountdown(seconds) {
+            const countdownElement = document.getElementById('countdown');
+            
+            const timer = setInterval(() => {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                
+                countdownElement.textContent = `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+                
+                if (seconds <= 0) {
+                    clearInterval(timer);
+                    countdownElement.textContent = "Expired";
+                    countdownElement.style.color = "#e74c3c";
+                    alert("OTP has expired. Please request a new OTP.");
+                }
+                
+                seconds--;
+            }, 1000);
+        }
+        
+        document.getElementById('otpForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const otp = document.getElementById('otpInput').value;
+            const mobile = sessionStorage.getItem('voterMobile');
+            
+            // Show loading
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/verify-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ mobile, otp })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Store session token
+                    sessionStorage.setItem('sessionToken', data.token);
+                    
+                    // Show success message
+                    alert('✓ OTP verified successfully! Proceeding to voting booth.');
+                    
+                    // Redirect to voting page
+                    window.location.href = 'voting.html';
+                } else {
+                    alert('✗ ' + data.message);
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                alert('✗ Network error. Please try again.');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+        
+        document.getElementById('resendOtp').addEventListener('click', function() {
+            // In production, this would call backend to resend OTP
+            alert('New OTP would be sent to your mobile number in production.');
+        });
+    </script>
+</body>
+</html>

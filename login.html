@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voter Login | National e-Voting System</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="gov-header">
+            <div class="header-top">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/1200px-Flag_of_India.svg.png" 
+                     alt="Indian Flag" class="flag">
+                <div class="header-text">
+                    <h1>Voter Verification Portal</h1>
+                    <h2>National e-Voting System</h2>
+                </div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/800px-Emblem_of_India.svg.png" 
+                     alt="National Emblem" class="emblem">
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="login-container">
+                <div class="login-header">
+                    <div class="login-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <h2>Voter Identity Verification</h2>
+                    <p class="login-subtitle">Enter your registered details to proceed with voting</p>
+                </div>
+
+                <div class="login-card">
+                    <div class="verification-steps">
+                        <div class="step active">
+                            <span class="step-number">1</span>
+                            <span class="step-text">Voter Details</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <span class="step-text">OTP Verification</span>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <span class="step-text">Cast Vote</span>
+                        </div>
+                    </div>
+
+                    <form id="voterForm" class="voter-form">
+                        <div class="form-group">
+                            <label for="voterName">
+                                <i class="fas fa-user"></i> Full Name (as per voter ID)
+                            </label>
+                            <input type="text" 
+                                   id="voterName" 
+                                   required 
+                                   placeholder="Enter your full name"
+                                   pattern="[A-Za-z\s]{3,50}"
+                                   title="Please enter a valid name (3-50 characters)">
+                            <div class="hint">Enter name exactly as registered</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mobileNumber">
+                                <i class="fas fa-mobile-alt"></i> Registered Mobile Number
+                            </label>
+                            <input type="tel" 
+                                   id="mobileNumber" 
+                                   required 
+                                   placeholder="Enter 10-digit mobile number"
+                                   pattern="[0-9]{10}"
+                                   title="Please enter a valid 10-digit mobile number">
+                            <div class="hint">Mobile number must be registered with voter ID</div>
+                        </div>
+
+                        <div class="security-notice">
+                            <i class="fas fa-shield-alt"></i>
+                            <p>Your information is secured with 256-bit encryption. All data is protected under the Official Secrets Act.</p>
+                        </div>
+
+                        <div class="form-actions">
+                            <a href="index.html" class="btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Home
+                            </a>
+                            <button type="submit" class="btn-primary">
+                                Verify & Continue <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="login-help">
+                        <h4><i class="fas fa-question-circle"></i> Need Help?</h4>
+                        <p>• Ensure you're using your registered mobile number</p>
+                        <p>• Name should match your voter ID card exactly</p>
+                        <p>• For assistance, call helpline: 1950 (Toll Free)</p>
+                    </div>
+                </div>
+
+                <div class="demo-credentials">
+                    <h4><i class="fas fa-info-circle"></i> Demo Voter Credentials:</h4>
+                    <div class="credentials-grid">
+                        <div class="credential">
+                            <strong>Name:</strong> Aarav Sharma<br>
+                            <strong>Mobile:</strong> 9876543210<br>
+                            <strong>OTP:</strong> 123456
+                        </div>
+                        <div class="credential">
+                            <strong>Name:</strong> Priya Patel<br>
+                            <strong>Mobile:</strong> 8765432109<br>
+                            <strong>OTP:</strong> 654321
+                        </div>
+                        <div class="credential">
+                            <strong>Name:</strong> Rahul Kumar<br>
+                            <strong>Mobile:</strong> 7654321098<br>
+                            <strong>OTP:</strong> 987654
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="gov-footer">
+            <div class="footer-bottom">
+                <p>© 2024 National e-Voting System, Government of India. All rights reserved.</p>
+                <p class="disclaimer">This is a demonstration system for official purposes only.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.getElementById('voterForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('voterName').value;
+            const mobile = document.getElementById('mobileNumber').value;
+            
+            // Show loading
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/verify-voter', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, mobile })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Store voter info in session storage
+                    sessionStorage.setItem('voterName', name);
+                    sessionStorage.setItem('voterMobile', mobile);
+                    sessionStorage.setItem('expectedOTP', data.otp);
+                    
+                    // Show success message
+                    alert('✓ Voter verified successfully! OTP has been sent to your registered mobile number.');
+                    
+                    // Redirect to OTP page
+                    window.location.href = 'otp.html';
+                } else {
+                    alert('✗ ' + data.message);
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                alert('✗ Network error. Please try again.');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
